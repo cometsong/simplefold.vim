@@ -98,14 +98,17 @@ function! s:SimpleFold_FoldText()
     endif
     let sub = substitute(line, '/\*\|\*/\|{{{\d\=', '', 'g')
     let diff = v:foldend - v:foldstart + 1
-    let numspaces = winwidth(0) - 10 - strlen(sub)
+    " new fold display setup 20120424 bleopold
+    let indent = '  +-----> '
+    let numspaces = winwidth(0) - 17 - strlen(sub) - strlen(indent)  " numspaces reduced to show [xx]- at end of line
     if numspaces > 0
-        let spaces = strpart('                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ',
+        let spaces = strpart('------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------',
             \ 0, numspaces)
     else
         let spaces = ' '
     endif
-    return  sub . spaces . '+' . v:folddashes . '[' . s:Num2S(diff,3) . ']'
+    "return  sub . spaces . '+' . v:folddashes . '[' . s:Num2S(diff,3) . ']'
+    return indent . sub . spaces . '+' . v:folddashes . '[ ' . s:Num2S(diff,3) . ' ]'
 endfunction
 
 "{{{~ Foldsearch originally based on t77: Fold on search result
