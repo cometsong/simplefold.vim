@@ -414,4 +414,18 @@ let g:omlet_simplefold_prefix = g:ocaml_simplefold_prefix
 let g:javascript_simplefold_prefix = '\v^((^\s{0,4}\S*\s*:.*\S+.*([,\{]$|\_\s*\}))|(^\w.*[\{=])|(^\s*\}))@!.*$'
 let g:javascript_simplefold_expr =     '\v(^\s{0,4}\S*\s*:.*\S+.*([,\{]$|\_\s*\}))|(^\w.*[\{=])'
 
+" {{{ sh support
+let g:sh_simplefold_expr =
+    \ '\v^\s*(function|if|for|do|while|until|case|else)\s' .
+    \ '|^\s*#' .
+    \ '|\{[^{]'
+let g:sh_simplefold_nestable_start_expr =
+    \ '\v^\s*(function|if|for|do|while|until|case|else)\s' .
+    \ '\v\}'
+let g:sh_simplefold_nestable_end_expr =
+    \ '\v(\}|#)' .
+    \ '\v(fi|done|esac)\s*'
+let g:sh_simplefold_prefix =
+    \ '\v^\s*(#.*)?$'
+
 let &cpo = s:save_cpo
