@@ -2,15 +2,20 @@
 " Plugin for simple search-based folding
 " Ships with support for Ruby, Perl, Java, PHP, Objective Caml, but can be
 " easily tailored to other filetypes.
-"       Version:    0.6.5 2011-08-30
+"       Version:    0.6.6 2012-11-13
 "        Author:    Mauricio Fernandez <mfp@acm.org>
 "    Maintainer:    Mauricio Fernandez <mfp@acm.org> http://eigenclass.org
 "   Contributor:    Darrick Wiebe <darrick@innatesoftware.com>
-"   Contributor:    Benjamin Leopold <jaminwebdesign@gmail.com>
+"   Contributor:    Benjamin Leopold <benjamin@cometsong.net>
 "       License:    GPL
+"
+" TODO: move filetype subsections into individual files in subdir, to be loaded on init
 "
 " Changelog
 " ---------
+"
+" 0.6.6
+"  * redesigned fold display lines
 "
 " 0.6.5
 "  * Made all indentation consistent (used 4 spaces to replace tabs), removed ending spaces.
@@ -71,13 +76,14 @@ endfunction
 
 "{{{ FoldText
 function! s:Num2S(num, len)
-    let filler = "                                                            "
+    let filler = repeat(' ', 60)
     let text = '' . a:num
     return strpart(filler, 1, a:len - strlen(text)) . text
 endfunction
 
 function! s:SimpleFold_FoldText()
     let linenum = v:foldstart
+    let folddepth = repeat('+', len(v:folddashes))
     if match(getline(linenum), s:GetOption("simplefold_marker_start")) != -1
         let line = getline(linenum)
     else
@@ -96,19 +102,17 @@ function! s:SimpleFold_FoldText()
             let line = getline(v:foldstart)
         endif
     endif
-    let sub = substitute(line, '/\*\|\*/\|{{{\d\=', '', 'g')
-    let diff = v:foldend - v:foldstart + 1
-    " new fold display setup 20120424 bleopold
-    let indent = '  +-----> '
-    let numspaces = winwidth(0) - 17 - strlen(sub) - strlen(indent)  " numspaces reduced to show [xx]- at end of line
+    let sub = substitute(line, '/\*\|\*/\|{{\[{\]\d\=', '', 'g')
+    let foldlines = v:foldend - v:foldstart + 1
+    let indent = ' +--> '
+    let numspaces = winwidth(0) - strlen(sub) - strlen(indent) - 5
     if numspaces > 0
-        let spaces = strpart('------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------',
-            \ 0, numspaces)
+        let spacefill = repeat('-',winwidth(0))
+        let spaces = strpart(spacefill, 1, numspaces - len(v:folddashes))
     else
         let spaces = ' '
     endif
-    "return  sub . spaces . '+' . v:folddashes . '[' . s:Num2S(diff,3) . ']'
-    return indent . sub . spaces . '+' . v:folddashes . '[ ' . s:Num2S(diff,3) . ' ]'
+    return indent . '[ ' . s:Num2S(foldlines,3) . ' ]' . folddepth . ' ' . sub . spaces . '+'
 endfunction
 
 "{{{~ Foldsearch originally based on t77: Fold on search result
