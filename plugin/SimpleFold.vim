@@ -322,7 +322,7 @@ endfunction
 "{{{~fold commands
 
 if !exists(":Fold")
-    command -nargs=1 Fold :call s:Foldsearch(<q-args>)
+    command -nargs=? Fold :call s:Foldsearch(<q-args>)
 endif
 
 "{{{ mappings and default options
