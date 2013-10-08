@@ -387,7 +387,7 @@ let g:perl_simplefold_nestable_start_expr =
 
 " {{{ PHP support
 let g:php_simplefold_expr =
-    \ '\v^\s*(class|function|const|public|private|define)>' .
+    \ '\v^\s*(static|final|abstract|class|function|const|public|private|protected|define)>' .
     \ '|^\s*[#%"0-9]{0,4}\s*\{\{\{[^{]'
 let g:php_simplefold_nestable_start_expr =
     \ '\v^\s*(if|for(each)?|while|switch)\s*\(.*\)\_s*\{'
