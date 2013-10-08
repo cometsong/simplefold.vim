@@ -2,7 +2,7 @@
 " Plugin for simple search-based folding
 " Ships with support for Ruby, Perl, Java, PHP, Objective Caml, but can be
 " easily tailored to other filetypes.
-"       Version:    0.6.6 2012-11-13
+"       Version:    0.6.7 2013-10-08
 "        Author:    Mauricio Fernandez <mfp@acm.org>
 "    Maintainer:    Mauricio Fernandez <mfp@acm.org> http://eigenclass.org
 "   Contributor:    Darrick Wiebe <darrick@innatesoftware.com>
@@ -13,6 +13,9 @@
 "
 " Changelog
 " ---------
+"
+" 0.6.7
+"  * added fdm closing markers for proper folding
 "
 " 0.6.6
 "  * redesigned look of foldtext display.
@@ -32,6 +35,7 @@
 "    window/buffer-specific settings)
 "  * added Perl, PHP, Objective Caml support
 " 
+"}}}
 
 if exists("loaded_simplefold")
     finish
@@ -42,11 +46,11 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 "{{{ set s:sid
-
 map <SID>xx <SID>xx
 let s:sid = maparg("<SID>xx")
 unmap <SID>xx
 let s:sid = substitute(s:sid, 'xx', '', '')
+"}}}
 
 "{{{ s:GetOption
 " grab a user-specified option to override the default provided.  options are
@@ -68,20 +72,22 @@ function! s:GetOption(name, ...)
         return a:1
     endif
 endfunction
+"}}}
 
-function! s:IsOptionSet(name)
+function! s:IsOptionSet(name) "{{{
     let bogus_val = "df hdsoi3y98 hjsdfhdkj"
     return s:GetOption(a:name, bogus_val) == bogus_val ? 0 : 1
-endfunction
+endfunction 
+"}}}
 
-"{{{ FoldText
-function! s:Num2S(num, len)
+function! s:Num2S(num, len) "{{{
     let filler = repeat(' ',60)
     let text = '' . a:num
     return strpart(filler, 1, a:len - strlen(text)) . text
 endfunction
+"}}}
 
-function! s:SimpleFold_FoldText()
+function! s:SimpleFold_FoldText() "{{{2
     let linenum = v:foldstart
     let folddepth = repeat('+', len(v:folddashes))
     if match(getline(linenum), s:GetOption("simplefold_marker_start")) != -1
@@ -115,11 +121,12 @@ function! s:SimpleFold_FoldText()
     endif
     return indent . '[ ' . s:Num2S(foldlines,3) . ' ]' . folddepth . ' ' . sub . spaces . '+'
 endfunction
+"}}}2
 
-"{{{~ Foldsearch originally based on t77: Fold on search result
+"~ Foldsearch originally based on t77: Fold on search result
 
 " Returns -1 if no match, 1 if fold start, 2 if fold end.
-function! s:search_boundary(fold_start_re, combined_re, use_combined, flags)
+function! s:search_boundary(fold_start_re, combined_re, use_combined, flags) "{{{
     let saved_cursor_pos = getpos(".")
     "echo "SEARCH BOUNDARY at "
     "echo saved_cursor_pos
@@ -166,8 +173,9 @@ function! s:search_boundary(fold_start_re, combined_re, use_combined, flags)
         endif
     endif
 endfunction
+"}}}
 
-function! s:Foldsearch(search)
+function! s:Foldsearch(search) "{{{
     " set manual
     setlocal fdm=manual
     let orig_cursor_pos = getpos(".")
@@ -259,8 +267,9 @@ function! s:Foldsearch(search)
     call setpos(".", orig_cursor_pos)
     silent! normal zMzO
 endfunction
+"}}}
 
-function! s:FoldNestableBlocks(start, end, start_expr, end_expr)
+function! s:FoldNestableBlocks(start, end, start_expr, end_expr) "{{{
     if a:end - a:start < 1
         return 0
     endif
@@ -318,12 +327,14 @@ function! s:FoldNestableBlocks(start, end, start_expr, end_expr)
     execute "normal " . origlineno . "G"
     "echo "RET " . a:start . " - " . a:end " -> " . origlineno
 endfunction
+"}}}
 
 "{{{~fold commands
 
 if !exists(":Fold")
     command -nargs=? Fold :call s:Foldsearch(<q-args>)
 endif
+"}}}
 
 "{{{ mappings and default options
 if !hasmapto("<Plug>SimpleFold_Foldsearch")
@@ -335,6 +346,7 @@ noremap <SID>FoldSearch :call <SID>Foldsearch("")<cr>
 if !exists("g:SimpleFold_use_subfolds")
     let g:SimpleFold_use_subfolds = 1
 endif
+"}}}
 
 "{{{ Fold expressions for different filetypes
 
@@ -355,6 +367,7 @@ let g:ruby_simplefold_nestable_start_expr =
     \ '|^[^#]*.*<do>\s*(\|.*\|)?'
 let g:ruby_simplefold_nestable_end_expr = '\v^\s*end'
 let g:ruby_simplefold_prefix = '\v^\s*(#([^{]+|\{[^{]|\{\{[^{])*)?$'
+"}}}
 
 " {{{ Java support
 let g:java_simplefold_expr = 
@@ -371,6 +384,7 @@ let g:objc_simplefold_end_expr = '\v(^\s*(\@end))'
 "       \ '\@synthesize|\@property|\@dynamic|static))'
 " let g:objc_simplefold_nestable_end_expr = '\v(^\s*(\}|\@end))'
 let g:objc_simplefold_prefix = '\v^\s*((/\*\_.*\*/)|((//).*))?$'
+"}}}
 
 " {{{ Perl support
 let g:perl_simplefold_expr =
@@ -384,6 +398,7 @@ let g:perl_simplefold_nestable_start_expr =
     \ '|else\s*\{' .
     \ '|foreach>\s*my[^\(]+\s*\(.*\)\s*\{' .
     \ '|(my>|our>)?\s*[@%\$].*\($)'
+"}}}
 
 " {{{ PHP support
 let g:php_simplefold_expr =
@@ -395,6 +410,7 @@ let g:php_simplefold_nestable_end_expr =
     \ '\v^\s*\}'
 let g:php_simplefold_prefix =
     \ '\v^\s*((/\*\_.*\*/)|((#|//).*))?$'
+"}}}
 
 " {{{ Objective Caml support
 let g:ocaml_simplefold_expr = 
@@ -414,10 +430,12 @@ let g:omlet_simplefold_expr = g:ocaml_simplefold_expr
 let g:omlet_simplefold_nestable_start_expr = g:ocaml_simplefold_nestable_start_expr
 let g:omlet_simplefold_nestable_end_expr = g:ocaml_simplefold_nestable_end_expr
 let g:omlet_simplefold_prefix = g:ocaml_simplefold_prefix
+"}}}
 
 " {{{ Javascript support
 let g:javascript_simplefold_prefix = '\v^((^\s{0,4}\S*\s*:.*\S+.*([,\{]$|\_\s*\}))|(^\w.*[\{=])|(^\s*\}))@!.*$'
 let g:javascript_simplefold_expr =     '\v(^\s{0,4}\S*\s*:.*\S+.*([,\{]$|\_\s*\}))|(^\w.*[\{=])'
+"}}}
 
 " {{{ sh support
 let g:sh_simplefold_expr =
@@ -432,5 +450,7 @@ let g:sh_simplefold_nestable_end_expr =
     \ '\v(fi|done|esac)\s*'
 let g:sh_simplefold_prefix =
     \ '\v^\s*(#.*)?$'
+"}}}
 
+"}}}
 let &cpo = s:save_cpo
